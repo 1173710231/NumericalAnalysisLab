@@ -5,8 +5,12 @@ import java.util.Map;
 
 public class Lab2 {
     public static void main(String[] args) {
-        Map<Integer, Double> map;
-        map = legendre(6);
+        try {
+            System.out.printf("%.6f",Newton(new F1(), 1e-6, 1e-4, 10, Math.PI / 4));
+        } catch (Exception e) {
+
+        }
+
     }
 
     static double Newton(Function f, double eps1, double eps2, int N, double x0) throws Exception {
@@ -34,28 +38,37 @@ public class Lab2 {
         throw new Exception();
     }
 
-    static Map<Integer, Double> legendre(int n) {
-        Map<Integer, Double> map1 = new HashMap<>();
-        Map<Integer, Double> map2 = new HashMap<>();
-        Map<Integer, Double> map3 = new HashMap<>();
-        map1.put(0, 1.0);
-        map2.put(1, 1.0);
+    static List<Map<Integer, Double>> legendre(int n) {
+        List<Map<Integer, Double>> maps = new ArrayList<>();
+        maps.add(new HashMap<>());
+        maps.get(0).put(0, 1.0);
+        maps.add(new HashMap<>());
+        maps.get(1).put(1, 1.0);
         double temp;
         if (n >= 2) {
-            for (int i = 2; i <= n; i++) {
-                for (Map.Entry<Integer, Double> entry : map2.entrySet()) {
-                    map3.put(entry.getKey() + 1, entry.getValue() * (2 * n + 3) / (n + 2));
+            for (int i = 0; i <= n - 2; i++) {
+                maps.add(new HashMap<>());
+                for (Map.Entry<Integer, Double> entry : maps.get(i + 1).entrySet()) {
+                    maps.get(i + 2).put(entry.getKey() + 1, entry.getValue() * (2 * i + 3) / (i + 2));
                 }
-                for (Map.Entry<Integer, Double> entry : map1.entrySet()) {
-                    temp = map3.getOrDefault(entry.getKey(), 0.0);
-                    map3.put(entry.getKey(), -entry.getValue() * (n + 1) / (n + 2) + temp);
+                for (Map.Entry<Integer, Double> entry : maps.get(i).entrySet()) {
+                    temp = maps.get(i + 2).getOrDefault(entry.getKey(), 0.0);
+                    maps.get(i + 2).put(entry.getKey(), temp - entry.getValue() * (i + 1) / (i + 2));
                 }
-                map1 = map2;
-                map2 = map3;
-                map3 = new HashMap<>();
             }
         }
-        return map2;
+        return maps;
+    }
+
+    static void print(List<Map<Integer, Double>> list, String name) {
+        for (Map<Integer, Double> map : list) {
+            System.out.print(name + "(x) = ");
+            for (Map.Entry<Integer, Double> entry : map.entrySet()) {
+                System.out.print(entry.getValue() + "x^" + entry.getKey() + " + ");
+            }
+            System.out.println();
+
+        }
     }
 }
 
