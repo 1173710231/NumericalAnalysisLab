@@ -1,3 +1,5 @@
+import sun.nio.ch.Net;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -6,8 +8,10 @@ import java.util.Map;
 public class Lab2 {
     public static void main(String[] args) {
         try {
-            System.out.printf("%.6f",Newton(new F1(), 1e-6, 1e-4, 10, Math.PI / 4));
+            PolyHelper polyHelper = new PolyHelper(Hermite(6).get(6));
+            System.out.println(Newton(polyHelper, 1e-6,1e-6, 200, 0.4));;
         } catch (Exception e) {
+            e.printStackTrace();
 
         }
 
@@ -38,7 +42,7 @@ public class Lab2 {
         throw new Exception();
     }
 
-    static List<Map<Integer, Double>> legendre(int n) {
+    static List<Map<Integer, Double>> Legendre(int n) {
         List<Map<Integer, Double>> maps = new ArrayList<>();
         maps.add(new HashMap<>());
         maps.get(0).put(0, 1.0);
@@ -54,6 +58,77 @@ public class Lab2 {
                 for (Map.Entry<Integer, Double> entry : maps.get(i).entrySet()) {
                     temp = maps.get(i + 2).getOrDefault(entry.getKey(), 0.0);
                     maps.get(i + 2).put(entry.getKey(), temp - entry.getValue() * (i + 1) / (i + 2));
+                }
+            }
+        }
+        return maps;
+    }
+
+    static List<Map<Integer, Double>> Chebyshev(int n) {
+        List<Map<Integer, Double>> maps = new ArrayList<>();
+        maps.add(new HashMap<>());
+        maps.get(0).put(0, 1.0);
+        maps.add(new HashMap<>());
+        maps.get(1).put(1, 1.0);
+        double temp;
+        if (n >= 2) {
+            for (int i = 0; i <= n - 2; i++) {
+                maps.add(new HashMap<>());
+                for (Map.Entry<Integer, Double> entry : maps.get(i + 1).entrySet()) {
+                    maps.get(i + 2).put(entry.getKey() + 1, entry.getValue() * 2);
+                }
+                for (Map.Entry<Integer, Double> entry : maps.get(i).entrySet()) {
+                    temp = maps.get(i + 2).getOrDefault(entry.getKey(), 0.0);
+                    maps.get(i + 2).put(entry.getKey(), temp - entry.getValue());
+                }
+            }
+        }
+        return maps;
+    }
+
+    static List<Map<Integer, Double>> Laguerre(int n) {
+        List<Map<Integer, Double>> maps = new ArrayList<>();
+        maps.add(new HashMap<>());
+        maps.get(0).put(0, 1.0);
+        maps.add(new HashMap<>());
+        maps.get(1).put(1, -1.0);
+        maps.get(1).put(0,1.0);
+        double temp;
+        if (n >= 2) {
+            for (int i = 0; i <= n - 2; i++) {
+                maps.add(new HashMap<>());
+                for (Map.Entry<Integer, Double> entry : maps.get(i + 1).entrySet()) {
+                    temp = maps.get(i + 2).getOrDefault(entry.getKey() + 1, 0.0);
+                    maps.get(i + 2).put(entry.getKey() + 1, temp - entry.getValue());
+                    temp = maps.get(i + 2).getOrDefault(entry.getKey(), 0.0);
+                    maps.get(i + 2).put(entry.getKey(), temp + entry.getValue() * (2 * i + 3));
+                }
+                for (Map.Entry<Integer, Double> entry : maps.get(i).entrySet()) {
+                    temp = maps.get(i + 2).getOrDefault(entry.getKey(), 0.0);
+                    maps.get(i + 2).put(entry.getKey(), temp - entry.getValue() * (i + 1) * (i + 1));
+                }
+            }
+        }
+        return maps;
+    }
+
+    static List<Map<Integer, Double>> Hermite(int n) {
+        List<Map<Integer, Double>> maps = new ArrayList<>();
+        maps.add(new HashMap<>());
+        maps.get(0).put(0, 1.0);
+        maps.add(new HashMap<>());
+        maps.get(1).put(1, 2.0);
+        double temp;
+        if (n >= 2) {
+            for (int i = 0; i <= n - 2; i++) {
+                maps.add(new HashMap<>());
+                for (Map.Entry<Integer, Double> entry : maps.get(i + 1).entrySet()) {
+                    temp = maps.get(i + 2).getOrDefault(entry.getKey()+1, 0.0);
+                    maps.get(i + 2).put(entry.getKey() + 1, entry.getValue() * 2);
+                }
+                for (Map.Entry<Integer, Double> entry : maps.get(i).entrySet()) {
+                    temp = maps.get(i + 2).getOrDefault(entry.getKey(), 0.0);
+                    maps.get(i + 2).put(entry.getKey(), temp - entry.getValue() * 2 * (i + 1));
                 }
             }
         }
@@ -143,6 +218,7 @@ class PolyHelper implements Function {
     }
 
     public PolyHelper(Map<Integer, Double> map) {
+        poly = new HashMap<>();
         for (Map.Entry<Integer, Double> e : map.entrySet()) {
             poly.put(e.getKey(), e.getValue());
         }
